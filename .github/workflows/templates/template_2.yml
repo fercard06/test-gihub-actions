@@ -14,13 +14,14 @@ env:
   GIT_HASH: ${{ github.sha }}
 
 jobs:
-  print_variables:
+  deply:
     name: print variables
+    environment: ${{ inputs.ENV_NAME }}
     runs-on: ubuntu-22.04
     steps:
       - name: Print vars
         run: |
-          echo "This is template 2"
+          echo "DEPLOY-This is template 2"
           echo "git_hash: $GIT_HASH"
       - name: End
         run: echo "FINISH"
