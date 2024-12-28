@@ -8,7 +8,7 @@ on:
 jobs:
   execute_workflow_call_1:
     name: Workflow call 1
-    uses: ./.github/workflows/template/template_1.yml
+    uses: ./.github/workflows/template_1.yml
     with:
       ENV_NAME: workflow_call_1
       ANOTHER_VAR: "this is sparta"
