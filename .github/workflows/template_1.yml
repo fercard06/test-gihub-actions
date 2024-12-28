@@ -1,0 +1,27 @@
+name: Workflow call
+
+on:
+  workflow_call:
+    inputs:
+      ENV_NAME:
+        required: true
+        type: string
+      ANOTHER_VAR:
+        required: true
+        type: string
+
+env:
+  GIT_HASH: ${{ github.sha }}
+
+jobs:
+  print_variables:
+    name: print variables
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Print vars
+        run: |
+          echo "env_name: ${{ inputs.ENV_NAME }}"
+          echo "another_var: ${{ inputs.ANOTHER_VAR }}"
+          echo "git_hash: $GIT_HASH"
+      - name: End
+        run: echo "FINISH"
