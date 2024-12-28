@@ -22,7 +22,7 @@ jobs:
       - name: Print vars
         run: |
           echo "DEPLOY-This is template 2"
-          ehco "Print env: ${{inputs.ENV_NAME}}"
+          echo "Print env: ${{inputs.ENV_NAME}}"
           echo "git_hash: $GIT_HASH"
       - name: End
         run: echo "FINISH"
