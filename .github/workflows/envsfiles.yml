@@ -12,4 +12,4 @@ jobs:
       - name: print env
         env:
           VARS_JSON: ${{ toJSON(vars) }}
-        run: echo "${VARS_JSON}"
+        run: echo "${{ vars }}"
