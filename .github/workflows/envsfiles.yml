@@ -12,4 +12,4 @@ jobs:
       - name: print env
         env:
           VARS_JSON: ${{ toJSON(vars) }}
-        run: echo "${{ vars }}"
+        run: echo "$VARS_JSON" | jq -r 'to_entries[] | select(.key | startswith("SSB_")) | "\(.key | sub("SSB_"; ""))=\(.value)"'
