@@ -10,6 +10,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: print env
-        env:
-          VARS_JSON: ${{ toJSON(vars) }}
-        run: echo "$VARS_JSON" | jq -r 'to_entries[] | select(.key | startswith("SSB_")) | "\(.key | sub("SSB_"; ""))=\(.value)"'
+        # env:
+        #   VARS_JSON: ${{ toJSON(vars) }}
+        run: echo "${{ toJSON(vars) }}" | jq -r 'to_entries[] | select(.key | startswith("SSB_")) | "\(.key | sub("SSB_"; ""))=\(.value)"'
