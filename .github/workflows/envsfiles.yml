@@ -1,0 +1,14 @@
+name: Test envs
+
+on:
+  workflow_dispatch:  
+
+jobs:
+  test_env_files:
+    name: Dump vars context
+    runs-on: ubuntu-22.04
+    steps:
+      - name: print env
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
+        run: echo "${VARS_JSON}"
