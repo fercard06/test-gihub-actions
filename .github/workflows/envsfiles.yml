@@ -5,6 +5,7 @@ on:
 
 jobs:
   test_env_files:
+    environment: develop
     name: Dump vars context
     runs-on: ubuntu-22.04
     steps:
