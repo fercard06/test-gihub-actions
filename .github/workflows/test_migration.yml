@@ -3,7 +3,7 @@ name: Test Migrations
 on:
   workflow_call:
     inputs:
-      ENV_NAME:
+      ENVIRONMENT:
         required: true
         type: string
       GCP_DB_ZONE:

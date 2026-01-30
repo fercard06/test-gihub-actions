@@ -7,7 +7,7 @@ jobs:
     name: Test migration
     uses: ./.github/workflows/test_migration.yml
     with:
-      ENV_NAME: "develop"
+      ENVIRONMENT: "develop"
       GCP_DB_ZONE: "us-central1-a"
       VM_BASTION_NAME: "db-bastion-host"
 
