@@ -1,0 +1,19 @@
+on:
+  workflow_dispatch:
+    
+
+jobs:
+  execute_workflow_call_1:
+    name: Test migration
+    uses: ./.github/workflows/test_migration.yml
+    with:
+      ENV_NAME: "develop"
+      GCP_DB_ZONE: "us-central1-a"
+      VM_BASTION_NAME: "db-bastion-host"
+
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_USER: ${{ secrets.DB_NAME }}  

@@ -1,0 +1,327 @@
+name: Test Migrations
+
+on:
+  workflow_call:
+    inputs:
+      ENV_NAME:
+        required: true
+        type: string
+      GCP_DB_ZONE:
+        description: 'Zone where the DB is hosted'
+        type: string
+        required: true
+      VM_BASTION_NAME:
+        description: 'Name of the vm bastion host'
+        required: true
+
+    
+    secrets:
+      GCP_SA_KEY:
+        description: 'GCP Service Account Key JSON'
+        required: true
+      GCP_PROJECT_ID:
+        description: 'GCP Project ID'
+        required: true
+      DB_NAME:
+        required: true
+      DB_PASSWORD:
+        required: true
+      DB_USER:
+        required: true
+      
+jobs:
+  test-migrations:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+      
+      # - name: Set up SSH key for bastion
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.BASTION_SSH_KEY }}" > ~/.ssh/bastion_key
+      #     chmod 600 ~/.ssh/bastion_key
+      
+      # - name: Install Cloud SQL Proxy on bastion
+      #   run: |
+      #     gcloud compute ssh YOUR_BASTION_VM \
+      #       --zone=YOUR_ZONE \
+      #       --project=vxt-config-dev \
+      #       --ssh-key-file=~/.ssh/bastion_key \
+      #       --command="
+      #         if [ ! -f ~/cloud-sql-proxy ]; then
+      #           wget https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.13.0/cloud-sql-proxy.linux.amd64 -O ~/cloud-sql-proxy
+      #           chmod +x ~/cloud-sql-proxy
+      #         fi
+      #       "
+      
+      # - name: Start Cloud SQL Proxy on bastion
+      #   run: |
+      #     gcloud compute ssh YOUR_BASTION_VM \
+      #       --zone=YOUR_ZONE \
+      #       --project=vxt-config-dev \
+      #       --ssh-key-file=~/.ssh/bastion_key \
+      #       --command="
+      #         pkill -f cloud-sql-proxy || true
+      #         nohup ~/cloud-sql-proxy --private-ip vxt-config-dev:us-central1:vxt-config-sql-instance --port 5432 > /dev/null 2>&1 &
+      #         sleep 3
+      #       "
+      
+      - name: Create SSH tunnel to bastion
+        run: |
+          gcloud compute ssh ${{inputs.VM_BASTION_NAME}} \
+            --zone=${{inputs.GCP_DB_ZONE}} \
+            --project=vxt-config-dev \
+            --ssh-flag="-L 5432:localhost:5432 -N -f"
+          sleep 2
+      
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+      
+      - name: Create temporary database
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          # Create a unique temp database name
+          TEMP_DB="migrations_test_$(date +%Y%m%d_%H%M%S)"
+          echo "TEMP_DB=$TEMP_DB" >> $GITHUB_ENV
+          
+          # Create the temporary database
+          psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d postgres -c "CREATE DATABASE $TEMP_DB;"
+          echo "✅ Created temporary database: $TEMP_DB"
+      
+      - name: Create dump from production database
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "📦 Creating dump from production database..."
+          pg_dump -h localhost -p 5432 \
+            -U ${{ secrets.DB_USER }} \
+            -d ${{ secrets.DB_NAME }} \
+            -F c \
+            -f production_dump.backup \
+            --no-owner \
+            --no-acl
+          
+          # Check dump size
+          du -h production_dump.backup
+          echo "✅ Dump created successfully"
+      
+      - name: Restore dump to temporary database
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          echo "📥 Restoring dump to temporary database..."
+          pg_restore -h localhost -p 5432 \
+            -U ${{ secrets.DB_USER }} \
+            -d $TEMP_DB \
+            --no-owner \
+            --no-acl \
+            -v \
+            production_dump.backup
+          
+          echo "✅ Restore completed"
+      
+      - name: Verify database restore
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+          PGUSER: ${{ secrets.DB_USER }}
+        run: |
+          echo "🔍 Verifying restored database..."
+          
+          # Count tables
+          TABLE_COUNT=$(psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d $TEMP_DB -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+          echo "Tables found: $TABLE_COUNT"
+          
+          # List tables
+          echo "Tables in database:"
+          psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d $TEMP_DB -c "\dt"
+          
+          if [ "$TABLE_COUNT" -lt 1 ]; then
+            echo "❌ No tables found in restored database"
+            exit 1
+          fi
+          
+          echo "✅ Database verification passed"
+      
+      - name: Set up migration environment
+        run: |
+          # Install your migration tool dependencies
+          # Example for Node.js:
+          # npm ci
+          
+          # Example for Python:
+          # pip install -r requirements.txt
+          
+          # Example for Go:
+          # go mod download
+          
+          echo "📦 Dependencies installed"
+      
+      - name: Run migrations on temporary database
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+          DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ env.TEMP_DB }}
+        run: |
+          echo "🚀 Running migrations..."
+          
+          # Replace with your actual migration command:
+          
+          # For Node.js (Prisma):
+          # npx prisma migrate deploy
+          
+          # For Node.js (Knex):
+          # npx knex migrate:latest
+          
+          # For Python (Alembic):
+          # alembic upgrade head
+          
+          # For Python (Django):
+          # python manage.py migrate
+          
+          # For Go (golang-migrate):
+          # migrate -path ./migrations -database "$DATABASE_URL" up
+          
+          # For Ruby (Rails):
+          # rails db:migrate
+          
+          # Example placeholder:
+          echo "Replace this with your migration command"
+          # npm run migrate
+          
+          echo "✅ Migrations completed successfully"
+      
+      # - name: Verify migrations
+      #   env:
+      #     PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+      #   run: |
+      #     echo "🔍 Verifying migrations..."
+          
+      #     # Check migration status
+      #     # Example for Prisma:
+      #     # npx prisma migrate status
+          
+      #     # Example for Alembic:
+      #     # alembic current
+          
+      #     # Custom verification queries
+      #     psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d $TEMP_DB -c "
+      #       SELECT 
+      #         schemaname,
+      #         tablename 
+      #       FROM pg_tables 
+      #       WHERE schemaname = 'public' 
+      #       ORDER BY tablename;
+      #     "
+          
+      #     echo "✅ Migration verification passed"
+      
+      # - name: Run migration tests (optional)
+      #   env:
+      #     PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+      #     DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ env.TEMP_DB }}
+      #   run: |
+      #     echo "🧪 Running tests against migrated database..."
+          
+      #     # Run your test suite
+      #     # npm test
+      #     # pytest
+      #     # go test ./...
+          
+      #     echo "✅ Tests passed"
+      
+      # - name: Generate migration report
+      #   if: always()
+      #   env:
+      #     PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+      #   run: |
+      #     echo "📊 Generating migration report..."
+          
+      #     cat > migration_report.md << EOF
+      #     # Migration Test Report
+          
+      #     **Date:** $(date)
+      #     **Temporary Database:** $TEMP_DB
+      #     **Production Database:** ${{ secrets.PROD_DB_NAME }}
+          
+      #     ## Database Statistics
+          
+      #     EOF
+          
+      #     psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d $TEMP_DB -c "
+      #       SELECT 
+      #         'Tables: ' || COUNT(*) 
+      #       FROM information_schema.tables 
+      #       WHERE table_schema = 'public';
+      #     " >> migration_report.md
+          
+      #     echo "Migration report generated"
+      #     cat migration_report.md
+      
+      # - name: Upload migration report
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: migration-report
+      #     path: migration_report.md
+      
+      # - name: Cleanup - Drop temporary database
+      #   if: always()
+      #   env:
+      #     PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+      #   run: |
+      #     if [ -n "$TEMP_DB" ]; then
+      #       echo "🧹 Cleaning up temporary database: $TEMP_DB"
+            
+      #       # Terminate connections to the database
+      #       psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d postgres -c "
+      #         SELECT pg_terminate_backend(pg_stat_activity.pid)
+      #         FROM pg_stat_activity
+      #         WHERE pg_stat_activity.datname = '$TEMP_DB'
+      #           AND pid <> pg_backend_pid();
+      #       "
+            
+      #       # Drop the database
+      #       psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d postgres -c "DROP DATABASE IF EXISTS $TEMP_DB;"
+      #       echo "✅ Temporary database dropped"
+      #     fi
+      
+      # - name: Cleanup - Stop tunnels
+      #   if: always()
+      #   run: |
+      #     echo "🧹 Stopping SSH tunnels..."
+      #     pkill -f "ssh.*YOUR_BASTION_VM" || true
+          
+      #     gcloud compute ssh YOUR_BASTION_VM \
+      #       --zone=YOUR_ZONE \
+      #       --project=vxt-config-dev \
+      #       --ssh-key-file=~/.ssh/bastion_key \
+      #       --command="pkill -f cloud-sql-proxy || true" || true
+          
+      #     echo "✅ Cleanup completed"
+      
+      # - name: Comment on PR with results
+      #   if: github.event_name == 'pull_request'
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const fs = require('fs');
+      #       const report = fs.readFileSync('migration_report.md', 'utf8');
+            
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: report
+      #       });
