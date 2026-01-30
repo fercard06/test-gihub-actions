@@ -29,6 +29,8 @@ on:
         required: true
       DB_USER:
         required: true
+      DB_HOST:
+        required: true
       
 jobs:
   test-migrations:
@@ -82,7 +84,7 @@ jobs:
           gcloud compute ssh ${{inputs.VM_BASTION_NAME}} \
             --zone=${{inputs.GCP_DB_ZONE}} \
             --project=vxt-config-dev \
-            --ssh-flag="-L 5432:localhost:5432 -N -f"
+            --ssh-flag="-L 5432:${{secrets.DB_HOST}}:5432 -N -f"
           sleep 2
       
       - name: Install PostgreSQL client
