@@ -33,7 +33,7 @@ on:
 jobs:
   test-migrations:
     runs-on: ubuntu-latest
-    
+    environment: ${{ inputs.ENVIRONMENT }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
