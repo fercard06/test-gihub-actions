@@ -23,6 +23,8 @@ on:
       GCP_PROJECT_ID:
         description: 'GCP Project ID'
         required: true
+      BASTION_SSH_KEY_64:
+        required: true
       DB_NAME:
         required: true
       DB_PASSWORD:
