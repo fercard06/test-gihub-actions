@@ -51,8 +51,17 @@ jobs:
       - name: Set up SSH key for bastion
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.BASTION_SSH_KEY }}" > ~/.ssh/bastion_key
+          echo "${{ secrets.BASTION_SSH_KEY_64 }}" | base64 -d > ~/.ssh/bastion_key
           chmod 600 ~/.ssh/bastion_key
+    
+          # Verify key format
+          if ! ssh-keygen -l -f ~/.ssh/bastion_key; then
+            echo "❌ Invalid SSH key"
+            cat ~/.ssh/bastion_key | head -c 100
+            exit 1
+          fi
+          
+    echo "✅ SSH key loaded successfully"
       
       # - name: Install Cloud SQL Proxy on bastion
       #   run: |
