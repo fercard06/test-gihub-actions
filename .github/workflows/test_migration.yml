@@ -61,7 +61,7 @@ jobs:
             exit 1
           fi
           
-    echo "✅ SSH key loaded successfully"
+          echo "✅ SSH key loaded successfully"
       
       # - name: Install Cloud SQL Proxy on bastion
       #   run: |
