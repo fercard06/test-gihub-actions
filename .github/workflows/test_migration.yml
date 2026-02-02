@@ -107,11 +107,13 @@ jobs:
       - name: Create temporary database
         env:
           PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+          TEST_ENV: testtest
         run: |
           # Create a unique temp database name
           TEMP_DB="migrations_test_$(date +%Y%m%d_%H%M%S)"
           echo "TEMP_DB=$TEMP_DB" >> $GITHUB_ENV
           echo $PGPASSWORD
+          echo $TEST_ENV
           
           # Create the temporary database
           psql -h localhost -p 8321 -U ${{ secrets.DB_USER }} -d postgres -c "CREATE DATABASE $TEMP_DB;"
