@@ -50,20 +50,20 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
       
-      - name: Set up SSH key for bastion
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.BASTION_SSH_KEY_64 }}" | base64 -d > ~/.ssh/bastion_key
-          chmod 600 ~/.ssh/bastion_key
+      # - name: Set up SSH key for bastion
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.BASTION_SSH_KEY_64 }}" | base64 -d > ~/.ssh/bastion_key
+      #     chmod 600 ~/.ssh/bastion_key
     
-          # Verify key format
-          if ! ssh-keygen -l -f ~/.ssh/bastion_key; then
-            echo "❌ Invalid SSH key"
-            cat ~/.ssh/bastion_key | head -c 100
-            exit 1
-          fi
+      #     # Verify key format
+      #     if ! ssh-keygen -l -f ~/.ssh/bastion_key; then
+      #       echo "❌ Invalid SSH key"
+      #       cat ~/.ssh/bastion_key | head -c 100
+      #       exit 1
+      #     fi
           
-          echo "✅ SSH key loaded successfully"
+      #     echo "✅ SSH key loaded successfully"
       
       # - name: Install Cloud SQL Proxy on bastion
       #   run: |
@@ -95,7 +95,6 @@ jobs:
           gcloud compute ssh ${{inputs.VM_BASTION_NAME}} \
             --zone=${{inputs.GCP_DB_ZONE}} \
             --project=${{ secrets.GCP_PROJECT_ID }} \
-            --ssh-key-file=~/.ssh/bastion_key \
             --tunnel-through-iap
             --ssh-flag="-L 5432:${{secrets.DB_HOST}}:5432 -N -f"
           sleep 2
