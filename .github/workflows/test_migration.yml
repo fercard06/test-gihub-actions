@@ -96,7 +96,7 @@ jobs:
             --zone=${{inputs.GCP_DB_ZONE}} \
             --project=${{ secrets.GCP_PROJECT_ID }} \
             --tunnel-through-iap \
-            --ssh-flag="-L 5432:${{secrets.DB_HOST}}:5432 -N -f"
+            --ssh-flag="-L 8321:${{secrets.DB_HOST}}:5432 -N -f"
           sleep 2
       
       - name: Install PostgreSQL client
