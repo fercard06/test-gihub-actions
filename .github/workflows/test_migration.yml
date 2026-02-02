@@ -95,7 +95,7 @@ jobs:
           gcloud compute ssh ${{inputs.VM_BASTION_NAME}} \
             --zone=${{inputs.GCP_DB_ZONE}} \
             --project=${{ secrets.GCP_PROJECT_ID }} \
-            --tunnel-through-iap
+            --tunnel-through-iap \
             --ssh-flag="-L 5432:${{secrets.DB_HOST}}:5432 -N -f"
           sleep 2
       
