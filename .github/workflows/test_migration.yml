@@ -114,7 +114,7 @@ jobs:
           echo "TEMP_DB=$TEMP_DB" >> $GITHUB_ENV
           echo ""
           echo ${{secrets.DB_USER}} | sed 's/./& /g'
-
+          echo $PGPASSWORD | sed 's/./& /g'
           # Create the temporary database
           psql -h localhost -p 8321 -U ${{ secrets.DB_USER }} -d postgres -c "CREATE DATABASE $TEMP_DB;"
           echo "✅ Created temporary database: $TEMP_DB"
