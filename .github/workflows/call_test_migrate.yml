@@ -10,11 +10,11 @@ jobs:
       ENVIRONMENT: "develop"
       GCP_DB_ZONE: "us-central1-a"
       VM_BASTION_NAME: "db-bastion-host"
+      DB_TUNNEL_PORT: "8321"
 
     secrets:
       GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      BASTION_SSH_KEY_64: ${{ secrets.BASTION_SSH_KEY_64 }}
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_USER: ${{ secrets.DB_USER }}
