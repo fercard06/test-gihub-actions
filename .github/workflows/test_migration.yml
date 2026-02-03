@@ -116,10 +116,7 @@ jobs:
           echo ${{secrets.DB_USER}} | sed 's/./& /g'
 
           # Create the temporary database
-          psql -h localhost -p 8321 \ 
-            -U ${{ secrets.DB_USER }} \
-            -d postgres \
-            -c "CREATE DATABASE $TEMP_DB;"
+          psql -h localhost -p 8321 -U ${{ secrets.DB_USER }} -d postgres -c "CREATE DATABASE $TEMP_DB;"
           echo "✅ Created temporary database: $TEMP_DB"
       
       - name: Create dump from production database
