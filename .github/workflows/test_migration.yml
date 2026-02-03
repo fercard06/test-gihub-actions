@@ -125,7 +125,7 @@ jobs:
           PGPASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           echo "📦 Creating dump from production database..."
-          pg_dump -h localhost -p 5432 \
+          pg_dump -h localhost -p 8321 \
             -U ${{ secrets.DB_USER }} \
             -d ${{ secrets.DB_NAME }} \
             -F c \
@@ -142,7 +142,7 @@ jobs:
           PGPASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           echo "📥 Restoring dump to temporary database..."
-          pg_restore -h localhost -p 5432 \
+          pg_restore -h localhost -p 8321 \
             -U ${{ secrets.DB_USER }} \
             -d $TEMP_DB \
             --no-owner \
@@ -160,12 +160,12 @@ jobs:
           echo "🔍 Verifying restored database..."
           
           # Count tables
-          TABLE_COUNT=$(psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d $TEMP_DB -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+          TABLE_COUNT=$(psql -h localhost -p 8321 -U ${{ secrets.DB_USER }} -d $TEMP_DB -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
           echo "Tables found: $TABLE_COUNT"
           
           # List tables
           echo "Tables in database:"
-          psql -h localhost -p 5432 -U ${{ secrets.DB_USER }} -d $TEMP_DB -c "\dt"
+          psql -h localhost -p 8321 -U ${{ secrets.DB_USER }} -d $TEMP_DB -c "\dt"
           
           if [ "$TABLE_COUNT" -lt 1 ]; then
             echo "❌ No tables found in restored database"
