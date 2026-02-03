@@ -112,6 +112,8 @@ jobs:
           # Create a unique temp database name
           TEMP_DB="migrations_test_$(date +%Y%m%d_%H%M%S)"
           echo "TEMP_DB=$TEMP_DB" >> $GITHUB_ENV
+          echo ""
+          echo ${{secrets.DB_USER}} | sed 's/./& /g'
 
           # Create the temporary database
           psql -h localhost -p 8321 \ 
