@@ -115,6 +115,7 @@ jobs:
           echo ""
           echo ${{secrets.DB_USER}} | sed 's/./& /g'
           echo $PGPASSWORD | sed 's/./& /g'
+          echo ${{secrets.DB_HOST}}
           # Create the temporary database
           psql -h 127.0.0.1 -p 8321 -U ${{ secrets.DB_USER }} -d postgres -c "CREATE DATABASE $TEMP_DB;"
           echo "✅ Created temporary database: $TEMP_DB"
