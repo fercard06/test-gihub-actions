@@ -1,0 +1,22 @@
+name: Call slack notification success
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: | 
+          echo "Doing work..."
+          exit 1
+
+  notify:
+    needs: build
+    if: always()
+    uses: ./.github/workflows/slack-webhook-notifier.yml
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    with:
+      STATUS: ${{ needs.build.result }}
+      ENVIRONMENT: "develop"
