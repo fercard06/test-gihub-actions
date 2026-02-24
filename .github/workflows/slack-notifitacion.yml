@@ -1,12 +1,16 @@
 on:
   workflow_call:
     inputs:
-      status:
+      STATUS:
         required: true
         type: string
         description: "The status of the job (success, failure, or cancelled)"
+      ENVIRONMENT:
+          type: string
+          description: 'Deployment Environment (e.g., dev, qa, prod)'
+          required: false
     secrets:
-      slack_webhook_url:
+      SLACK_WEBHOOK_URL:
         required: true
         description: "The Slack Incoming Webhook URL"
 
@@ -27,7 +31,7 @@ jobs:
                     "type": "header",
                     "text": {
                       "type": "plain_text",
-                      "text": "Deployment of ${{github.repository}} ${{ inputs.status == 'success' && 'succeded ✅' ||  'failed ❌'}}",
+                      "text": "Deployment of ${{github.repository}} ${{ inputs.STATUS == 'success' && 'succeded ✅' ||  'failed ❌'}}",
                       "emoji": true
                     }
                   },
@@ -35,14 +39,14 @@ jobs:
                     "type": "section",
                     "text": {
                       "type": "plain_text",
-                      "text": "Deploy to ${{inputs.environment}} ${{ inputs.status == 'success' && 'succeded ✅' ||  'failed ❌'}}"
+                      "text": "Deploy to ${{inputs.ENVIRONMENT}} ${{ inputs.STATUS == 'success' && 'succeded ✅' ||  'failed ❌'}}"
                     }
                   },
                   {
                     "type": "section",
                     "text": {
                       "type": "plain_text",
-                      "text": "*Repo:* ${{ github.repository }}\n*Workflow:* ${{ github.workflow }}\n*Status:* ${{ inputs.status }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Build Details>"
+                      "text": "*Repo:* ${{ github.repository }}\n*Workflow:* ${{ github.workflow }}\n*Status:* ${{ inputs.STATUS }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Build Details>"
                     }
                   }
                 ]
