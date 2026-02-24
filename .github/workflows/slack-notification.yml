@@ -18,6 +18,14 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Secret Access
+        run: |
+          if [ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "SECRET IS EMPTY"
+            exit 1
+          else
+            echo "SECRET IS DEFINED"
+          fi
       - name: Send Webhook
         uses: slackapi/slack-github-action@v2.0.0
         with:
@@ -45,7 +53,7 @@ jobs:
                   {
                     "type": "section",
                     "text": {
-                      "type": "plain_text",
+                      "type": "mrkdwn",
                       "text": "*Repo:* ${{ github.repository }}\n*Workflow:* ${{ github.workflow }}\n*Status:* ${{ inputs.STATUS }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Build Details>"
                     }
                   }
