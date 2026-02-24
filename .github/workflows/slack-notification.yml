@@ -16,6 +16,7 @@ on:
 
 jobs:
   notify:
+    if: ${{ inputs.STATUS == 'success' || inputs.STATUS == 'failure' }}
     environment: ${{ inputs.ENVIRONMENT }}
     runs-on: ubuntu-latest
     steps:
