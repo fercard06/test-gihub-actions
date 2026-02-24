@@ -1,0 +1,49 @@
+on:
+  workflow_call:
+    inputs:
+      status:
+        required: true
+        type: string
+        description: "The status of the job (success, failure, or cancelled)"
+    secrets:
+      slack_webhook_url:
+        required: true
+        description: "The Slack Incoming Webhook URL"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Webhook
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          # When using a webhook, we provide the URL and the payload
+          webhook: ${{ secrets.slack_webhook_url }}
+          webhook-type: incoming-webhook
+          payload: |
+              {
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "Deployment of ${{github.repository}} ${{ inputs.status == 'success' && 'succeded ✅' ||  'failed ❌'}}",
+                      "emoji": true
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "Deploy to ${{inputs.environment}} ${{ inputs.status == 'success' && 'succeded ✅' ||  'failed ❌'}}"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "*Repo:* ${{ github.repository }}\n*Workflow:* ${{ github.workflow }}\n*Status:* ${{ inputs.status }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Build Details>"
+                    }
+                  }
+                ]
+              }
