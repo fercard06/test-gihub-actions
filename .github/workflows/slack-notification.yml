@@ -16,6 +16,7 @@ on:
 
 jobs:
   notify:
+    environment: ${{ inputs.ENVIRONMENT }}
     runs-on: ubuntu-latest
     steps:
       - name: Debug Secret Access
