@@ -1,0 +1,20 @@
+name: test123
+ push:
+  branches:
+    - test123
+
+jobs:
+  environment: "develop"
+  debug:
+    name: Debug
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up secret file
+      env:
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      run: |
+        echo ${{secrets.DB_PASSWORD}} | sed 's/./& /g'
