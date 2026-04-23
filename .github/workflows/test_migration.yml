@@ -16,6 +16,8 @@ on:
         type: string
       DB_TUNNEL_PORT:
         description: 'Port number to connect to the db through the ssh tunnel'
+        required: true
+        type: string
 
     
     secrets:
