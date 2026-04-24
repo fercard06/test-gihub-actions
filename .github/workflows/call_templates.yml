@@ -3,7 +3,7 @@ name: Execute workflow call 1
 on:
   push:
     branches: 
-      - "qa-*"
+      - "master"
 
 jobs:
   execute_workflow_call_1:
