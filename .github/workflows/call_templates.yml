@@ -31,7 +31,9 @@ jobs:
     steps:
       - name: print changes
         run: echo "Migrations changed? ${{ needs.changes.outputs.migrations }}"
-        
+      - name: pring changes 2
+        run: echo "Migrations changed? needs.changes.outputs.migrations"
+
   execute_workflow_call_2:
     name: Workflow call 2
     needs: [execute_workflow_call_1]
