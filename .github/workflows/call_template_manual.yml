@@ -23,7 +23,15 @@ jobs:
         with:
           filters: |
             migrations:
-              - 'migrations/**'      # Change in schema 
+              - 'migrations/**'      # Change in schema
+
+  print_changes:
+    needs: [changes]
+    runs-on: ubuntu-latest
+    steps:
+      - name: print changes
+        run: echo "Migrations changed? ${{ needs.changes.outputs.migrations }}"
+
   execute_workflow_call_2:
     name: Workflow call 2
     needs: [execute_workflow_call_1, changes]
