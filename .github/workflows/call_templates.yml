@@ -27,6 +27,7 @@ jobs:
   execute_workflow_call_2:
     name: Workflow call 2
     needs: [execute_workflow_call_1]
+    if: needs.changes.outputs.migrations == 'true'
     uses: ./.github/workflows/template_2.yml
     with:
       ENV_NAME: qa
