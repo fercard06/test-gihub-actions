@@ -13,6 +13,7 @@ jobs:
       ENV_NAME: workflow_call_1
       ANOTHER_VAR: "this is sparta"
   changes:
+    id: changes
     runs-on: ubuntu-latest
     outputs:
       migrations: ${{ steps.filter.outputs.migrations }}
@@ -35,10 +36,12 @@ jobs:
         run: echo "Migrations changed? needs.changes.outputs.migrations"
 
   execute_workflow_call_2:
-    name: Workflow call 2
-    needs: [execute_workflow_call_1]
-    if: ${{ needs.changes.outputs.migrations }} == 'true'
-    uses: ./.github/workflows/template_2.yml
-    with:
+    - name: print changes
+      run: echo "outputs change ${{ needs.changes.outputs.migrations}}"
+    - name: Workflow call 2
+      needs: [execute_workflow_call_1]
+      if: ${{ needs.changes.outputs.migrations }} == 'true'
+      uses: ./.github/workflows/template_2.yml
+      with:
       ENV_NAME: qa
       ANOTHER_VAR: "this is not sparta"
