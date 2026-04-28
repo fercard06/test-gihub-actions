@@ -12,6 +12,7 @@ jobs:
     with:
       ENV_NAME: workflow_call_1
       ANOTHER_VAR: "this is sparta"
+  
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -36,7 +37,7 @@ jobs:
 
   execute_workflow_call_2:
     name: Workflow call 2
-    needs: [execute_workflow_call_1, changes]
+    needs: [execute_workflow_call_1, changes, print_changes]
     if: ${{ needs.changes.outputs.migrations == 'true' }} 
     uses: ./.github/workflows/template_2.yml
     with:
