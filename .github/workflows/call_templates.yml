@@ -13,7 +13,7 @@ jobs:
       ENV_NAME: workflow_call_1
       ANOTHER_VAR: "this is sparta"
   
-  changes:
+  check_migrations:
     runs-on: ubuntu-latest
     outputs:
       migrations: ${{ steps.filter.outputs.migrations }}
@@ -27,18 +27,18 @@ jobs:
               - 'migrations/**'      # Change in schema 
 
   print_changes:
-    needs: [changes]
+    needs: [check_migrations]
     runs-on: ubuntu-latest
     steps:
       - name: print changes
-        run: echo "Migrations changed? ${{ needs.changes.outputs.migrations }}"
+        run: echo "Migrations changed? ${{ needs.check_migrations.outputs.migrations }}"
       - name: pring changes 2
-        run: echo "Migrations changed? needs.changes.outputs.migrations"
+        run: echo "Migrations changed? needs.check_migrations.outputs.migrations"
 
   execute_workflow_call_2:
     name: Workflow call 2
-    needs: [execute_workflow_call_1, changes, print_changes]
-    if: ${{ needs.changes.outputs.migrations == 'true' }} 
+    needs: [execute_workflow_call_1, check_migrations, print_changes]
+    if: ${{ needs.check_migrations.outputs.migrations == 'true' }} 
     uses: ./.github/workflows/template_2.yml
     with:
       ENV_NAME: qa
